@@ -23,8 +23,14 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
   const [time, setTime] = useState(eventToEdit?.time || '');
   const [timezone, setTimezone] = useState(eventToEdit?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'local');
   const [backgroundImage, setBackgroundImage] = useState(eventToEdit?.backgroundImage || '');
-  const [error, setError] = useState<string | null>(null);
+  
+  // Consolidate form errors
+  const [formError, setFormError] = useState<string | null>(null);
+  const [backgroundImageError, setBackgroundImageError] = useState<string | null>(null);
+  
   const [isSaving, setIsSaving] = useState(false);
+  
+  // AI-specific states
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
@@ -37,16 +43,17 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        setError("Image size cannot exceed 5MB.");
+        setBackgroundImageError("Image size cannot exceed 5MB.");
+        e.target.value = ''; // Clear file input
         return;
       }
+      setBackgroundImageError(null);
       const reader = new FileReader();
       reader.onloadend = () => {
         setBackgroundImage(reader.result as string);
-        setError(null); // Clear previous errors
       };
       reader.onerror = () => {
-        setError("Failed to read the image file.");
+        setBackgroundImageError("Failed to read the image file.");
       }
       reader.readAsDataURL(file);
     }
@@ -57,7 +64,8 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) { // 5MB limit
-      setAnalysisError("Image for analysis cannot exceed 5MB.");
+      setAnalysisError("Image for analysis must be under 5MB.");
+      e.target.value = ''; // Clear file input
       return;
     }
     
@@ -71,18 +79,23 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
       ]);
       
       const details = await getEventDetailsFromImage(base64Data, file.type);
-
-      if (details) {
+      
+      // Check if AI returned meaningful data
+      if (details && (details.title || details.date || details.time)) {
         if (details.title) setTitle(details.title);
         if (details.date) setDate(details.date);
         if (details.time) setTime(details.time);
         setBackgroundImage(dataUrl); // Use the uploaded image as background
+        setFormError(null); // Clear main form error if AI was successful
+        setBackgroundImageError(null); // Also clear background image error
       } else {
-        setAnalysisError("Could not extract details from the image. Please fill them in manually.");
+        setAnalysisError("Could not extract details from the image. Clear, high-quality images work best. Please fill in the form manually.");
+        // Still set background as a convenience for the user
+        setBackgroundImage(dataUrl);
       }
     } catch (err) {
       console.error(err);
-      setAnalysisError("An error occurred during analysis. Please try again.");
+      setAnalysisError("An error occurred during analysis. Please check your connection and try again.");
     } finally {
       setIsAnalyzing(false);
       // Clear the file input so the same file can be selected again
@@ -95,8 +108,11 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
     e.preventDefault();
     if (isSaving || isAnalyzing) return;
 
+    // Clear previous errors
+    setFormError(null);
+    
     if (!title || !date || !time) {
-      setError('Title, date, and time fields are required.');
+      setFormError('Title, date, and time fields are required.');
       return;
     }
 
@@ -109,12 +125,11 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
     now.setSeconds(0, 0);
 
     if (targetDate.getTime() < now.getTime() && !eventToEdit) {
-      setError('The selected date and time must be in the future.');
+      setFormError('The selected date and time must be in the future.');
       return;
     }
     
     setIsSaving(true);
-    setError(null);
 
     try {
       const category = (eventToEdit && eventToEdit.title === title && eventToEdit.category)
@@ -274,12 +289,13 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
             className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-cyan-600 file:text-white hover:file:bg-cyan-700 disabled:opacity-50"
             disabled={allDisabled}
           />
-           {backgroundImage && (
+           {backgroundImageError && <p className="text-red-400 text-sm mt-2">{backgroundImageError}</p>}
+           {backgroundImage && !backgroundImageError && (
             <div className="mt-4 relative">
               <img src={backgroundImage} alt="Background Preview" className="w-full h-32 object-cover rounded-md" />
               <button
                 type="button"
-                onClick={() => setBackgroundImage('')}
+                onClick={() => { setBackgroundImage(''); setBackgroundImageError(null); }}
                 className="absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 text-xs hover:bg-black/80"
                 title="Remove image"
                 disabled={allDisabled}
@@ -289,7 +305,7 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
             </div>
           )}
         </div>
-        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+        {formError && <p className="text-red-400 text-sm text-center">{formError}</p>}
         <div className="flex flex-col sm:flex-row gap-4">
             <button
                 type="button"
