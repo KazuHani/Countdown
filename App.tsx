@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { EventDetails } from './types';
-import { SetupView } from './components/SetupView';
-import { CountdownView } from './components/CountdownView';
-import { DashboardView } from './components/DashboardView';
-import { getTargetDate } from './utils/calendar';
-import { DEFAULT_CATEGORIES } from './constants/categories';
+import { EventDetails } from './types.ts';
+import { SetupView } from './components/SetupView.tsx';
+import { CountdownView } from './components/CountdownView.tsx';
+import { DashboardView } from './components/DashboardView.tsx';
+import { getTargetDate } from './utils/calendar.ts';
+import { DEFAULT_CATEGORIES } from './constants/categories.ts';
 
 const STORAGE_KEY = 'countdownEventsList';
 const CATEGORIES_STORAGE_KEY = 'countdownCategories';
@@ -111,7 +111,7 @@ const App: React.FC = () => {
             event.id === editingEventId ? { ...event, ...details } : event
         );
     } else {
-        const { getCategoryForTitle } = await import('./utils/ai');
+        const { getCategoryForTitle } = await import('./utils/ai.ts');
         const category = await getCategoryForTitle(details.title, categories);
         const newEvent: EventDetails = {
           ...details,

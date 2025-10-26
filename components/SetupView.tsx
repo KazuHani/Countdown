@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { EventDetails } from '../types';
-import { TIMEZONES } from '../constants/timezones';
-import { getTargetDate } from '../utils/calendar';
-import { getCategoryForTitle, getEventDetailsFromImage } from '../utils/ai';
-import { LocationIcon } from './icons/LocationIcon';
-import { SparklesIcon } from './icons/SparklesIcon';
-import { fileToBase64, fileToDataUrl } from '../utils/image';
+import { EventDetails } from '../types.ts';
+import { TIMEZONES } from '../constants/timezones.ts';
+import { getTargetDate } from '../utils/calendar.ts';
+import { getCategoryForTitle, getEventDetailsFromImage } from '../utils/ai.ts';
+import { LocationIcon } from './icons/LocationIcon.tsx';
+import { SparklesIcon } from './icons/SparklesIcon.tsx';
+import { fileToBase64, fileToDataUrl } from '../utils/image.ts';
 
 
 type EventFormData = Omit<EventDetails, 'id'>;

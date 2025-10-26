@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { TrashIcon } from './icons/TrashIcon';
-import { EditIcon } from './icons/EditIcon';
-import { CheckIcon } from './icons/CheckIcon';
-import { XIcon } from './icons/XIcon';
+import { TrashIcon } from './icons/TrashIcon.tsx';
+import { EditIcon } from './icons/EditIcon.tsx';
+import { CheckIcon } from './icons/CheckIcon.tsx';
+import { XIcon } from './icons/XIcon.tsx';
 
 interface CategoryManagerProps {
   categories: string[];

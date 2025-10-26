@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { EventDetails, TimeLeft } from '../types';
-import { getTargetDate, generateGoogleCalendarUrl, generateIcsFileContent, downloadFile, calculateTimeLeft } from '../utils/calendar';
-import { CalendarIcon } from './icons/CalendarIcon';
-import { GoogleIcon } from './icons/GoogleIcon';
-import { AppleIcon } from './icons/AppleIcon';
-import { Confetti } from './Confetti';
+import { EventDetails, TimeLeft } from '../types.ts';
+import { getTargetDate, generateGoogleCalendarUrl, generateIcsFileContent, downloadFile, calculateTimeLeft } from '../utils/calendar.ts';
+import { CalendarIcon } from './icons/CalendarIcon.tsx';
+import { GoogleIcon } from './icons/GoogleIcon.tsx';
+import { AppleIcon } from './icons/AppleIcon.tsx';
+import { Confetti } from './Confetti.tsx';
 
 interface CountdownViewProps {
   eventDetails: EventDetails;

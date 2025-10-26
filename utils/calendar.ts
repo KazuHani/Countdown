@@ -1,6 +1,6 @@
 
-import { EventDetails, TimeLeft } from '../types';
-import { TIMEZONES } from '../constants/timezones';
+import { EventDetails, TimeLeft } from '../types.ts';
+import { TIMEZONES } from '../constants/timezones.ts';
 
 /**
  * Converts user input (date, time, timezone) into a precise UTC Date object.

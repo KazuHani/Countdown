@@ -1,5 +1,6 @@
 
-import { TimezoneOption } from '../types';
+
+import { TimezoneOption } from '../types.ts';
 
 export const TIMEZONES: TimezoneOption[] = [
   { value: 'local', label: 'Use My Current Timezone' },

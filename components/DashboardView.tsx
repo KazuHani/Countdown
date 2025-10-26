@@ -1,18 +1,19 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { EventDetails, TimeLeft } from '../types';
-import { getTargetDate, calculateTimeLeft } from '../utils/calendar';
-import { PlusIcon } from './icons/PlusIcon';
-import { TrashIcon } from './icons/TrashIcon';
-import { GiftIcon } from './icons/GiftIcon';
-import { CakeIcon } from './icons/CakeIcon';
-import { BriefcaseIcon } from './icons/BriefcaseIcon';
-import { PlaneIcon } from './icons/PlaneIcon';
-import { TagIcon } from './icons/TagIcon';
-import { EditIcon } from './icons/EditIcon';
-import { Confetti } from './Confetti';
-import { CogIcon } from './icons/CogIcon';
-import { CategoryManager } from './CategoryManager';
+import { EventDetails, TimeLeft } from '../types.ts';
+import { getTargetDate, calculateTimeLeft } from '../utils/calendar.ts';
+import { PlusIcon } from './icons/PlusIcon.tsx';
+import { TrashIcon } from './icons/TrashIcon.tsx';
+import { GiftIcon } from './icons/GiftIcon.tsx';
+import { CakeIcon } from './icons/CakeIcon.tsx';
+import { BriefcaseIcon } from './icons/BriefcaseIcon.tsx';
+import { PlaneIcon } from './icons/PlaneIcon.tsx';
+import { TagIcon } from './icons/TagIcon.tsx';
+import { EditIcon } from './icons/EditIcon.tsx';
+import { Confetti } from './Confetti.tsx';
+import { CogIcon } from './icons/CogIcon.tsx';
+import { CategoryManager } from './CategoryManager.tsx';
 
 interface DashboardViewProps {
   events: EventDetails[];
