@@ -1,1 +1,1 @@
-export const CATEGORIES = ["Holiday", "Birthday", "Work", "Personal", "Travel", "Anniversary", "Other"];
+export const DEFAULT_CATEGORIES = ["Holiday", "Birthday", "Work", "Personal", "Travel", "Anniversary", "Other"];

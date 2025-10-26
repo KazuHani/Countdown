@@ -1,17 +1,19 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { EventDetails } from './types';
 import { SetupView } from './components/SetupView';
 import { CountdownView } from './components/CountdownView';
 import { DashboardView } from './components/DashboardView';
 import { getTargetDate } from './utils/calendar';
+import { DEFAULT_CATEGORIES } from './constants/categories';
 
 const STORAGE_KEY = 'countdownEventsList';
+const CATEGORIES_STORAGE_KEY = 'countdownCategories';
 
 type View = 'dashboard' | 'setup' | 'countdown';
 
 const App: React.FC = () => {
   const [events, setEvents] = useState<EventDetails[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [view, setView] = useState<View>('dashboard');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
@@ -32,6 +34,19 @@ const App: React.FC = () => {
       console.error("Failed to load events from localStorage", error);
       localStorage.removeItem(STORAGE_KEY);
     }
+    
+    try {
+      const savedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+      if (savedCategories && JSON.parse(savedCategories).length > 0) {
+        setCategories(JSON.parse(savedCategories));
+      } else {
+        setCategories(DEFAULT_CATEGORIES);
+        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(DEFAULT_CATEGORIES));
+      }
+    } catch (error) {
+      console.error("Failed to load categories from localStorage", error);
+      setCategories(DEFAULT_CATEGORIES);
+    }
   }, []);
 
   const saveEvents = useCallback((updatedEvents: EventDetails[]) => {
@@ -42,17 +57,66 @@ const App: React.FC = () => {
         console.error("Failed to save events to localStorage", error);
       }
   }, []);
+  
+  const saveCategories = useCallback((updatedCategories: string[]) => {
+    try {
+        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updatedCategories));
+        setCategories(updatedCategories);
+    } catch (error) {
+        console.error("Failed to save categories to localStorage", error);
+    }
+  }, []);
 
-  const handleSave = (details: Omit<EventDetails, 'id'>) => {
+  const handleAddCategory = (newCategory: string) => {
+    if (newCategory && !categories.includes(newCategory)) {
+        saveCategories([...categories, newCategory].sort());
+    }
+  };
+
+  const handleUpdateCategory = (oldCategory: string, newCategory: string) => {
+      if (newCategory && oldCategory !== newCategory && !categories.includes(newCategory)) {
+          const updatedCategories = categories.map(c => c === oldCategory ? newCategory : c);
+          saveCategories(updatedCategories.sort());
+
+          const updatedEvents = events.map(event =>
+              event.category === oldCategory ? { ...event, category: newCategory } : event
+          );
+          saveEvents(updatedEvents);
+      }
+  };
+
+  const handleDeleteCategory = (categoryToDelete: string) => {
+    if (categories.length <= 1) {
+        alert("You cannot delete the last category.");
+        return;
+    }
+    if (window.confirm(`Are you sure you want to delete the "${categoryToDelete}" category? Events using it will be moved to another category.`)) {
+        const updatedCategories = categories.filter(c => c !== categoryToDelete);
+        
+        const fallbackCategory = updatedCategories.includes('Other') ? 'Other' : updatedCategories[0];
+
+        saveCategories(updatedCategories);
+
+        const updatedEvents = events.map(event =>
+            event.category === categoryToDelete ? { ...event, category: fallbackCategory } : event
+        );
+        saveEvents(updatedEvents);
+    }
+  };
+
+  const handleSave = async (details: Omit<EventDetails, 'id'>) => {
     let updatedEvents;
     if (editingEventId) {
         updatedEvents = events.map(event => 
             event.id === editingEventId ? { ...event, ...details } : event
         );
     } else {
+        const { getCategoryForTitle } = await import('./utils/ai');
+        const category = await getCategoryForTitle(details.title, categories);
         const newEvent: EventDetails = {
           ...details,
           id: new Date().getTime().toString(),
+          category: details.category || category,
         };
         updatedEvents = [...events, newEvent];
     }
@@ -107,11 +171,15 @@ const App: React.FC = () => {
       {view === 'dashboard' && (
         <DashboardView 
             events={events}
+            categories={categories}
             onSelectEvent={handleSelectEvent}
             onDeleteEvent={handleDelete}
             onAddNew={handleAddNew}
             onEditEvent={handleEditEvent}
             onUpdateEvent={handleUpdateEvent}
+            onAddCategory={handleAddCategory}
+            onUpdateCategory={handleUpdateCategory}
+            onDeleteCategory={handleDeleteCategory}
         />
       )}
       {view === 'setup' && (
@@ -119,6 +187,7 @@ const App: React.FC = () => {
           onSave={handleSave} 
           onCancel={handleCancelSetup} 
           eventToEdit={eventToEdit}
+          categories={categories}
         />
       )}
     </main>

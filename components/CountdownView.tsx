@@ -4,6 +4,7 @@ import { getTargetDate, generateGoogleCalendarUrl, generateIcsFileContent, downl
 import { CalendarIcon } from './icons/CalendarIcon';
 import { GoogleIcon } from './icons/GoogleIcon';
 import { AppleIcon } from './icons/AppleIcon';
+import { Confetti } from './Confetti';
 
 interface CountdownViewProps {
   eventDetails: EventDetails;
@@ -56,6 +57,7 @@ export const CountdownView: React.FC<CountdownViewProps> = ({ eventDetails, onBa
 
   return (
     <div className="fixed inset-0 bg-gray-900 animate-fade-in">
+        {isFinished && <Confetti />}
         <div className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-0" style={{...backgroundStyle, opacity: eventDetails.backgroundImage ? 1: 0 }} />
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 to-slate-800/70" />
         
@@ -65,8 +67,8 @@ export const CountdownView: React.FC<CountdownViewProps> = ({ eventDetails, onBa
                 <p className="text-gray-300 mb-8">{targetDate.toLocaleString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
 
                 {isFinished ? (
-                    <div className="text-5xl font-bold text-green-400 p-10 bg-gray-800/50 backdrop-blur-sm rounded-2xl">
-                        Event Started!
+                    <div className="text-5xl font-bold text-green-400 p-10 bg-gray-800/50 backdrop-blur-sm rounded-2xl animate-pop-in">
+                        Finished
                     </div>
                 ) : (
                     <div className="flex justify-center items-center space-x-2 sm:space-x-4">

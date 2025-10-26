@@ -45,6 +45,18 @@
   }
 }
 </script>
+<style>
+  @keyframes fall {
+    from {
+      transform: translateY(-20px) rotate(0deg);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+</style>
 </head>
   <body class="bg-gray-900 text-white font-sans">
     <div id="root"></div>

@@ -11,9 +11,10 @@ interface SetupViewProps {
   onSave: (details: EventFormData) => void;
   onCancel: () => void;
   eventToEdit?: EventDetails;
+  categories: string[];
 }
 
-export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToEdit }) => {
+export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToEdit, categories }) => {
   const [title, setTitle] = useState(eventToEdit?.title || '');
   const [date, setDate] = useState(eventToEdit?.date || '');
   const [time, setTime] = useState(eventToEdit?.time || '');
@@ -75,7 +76,8 @@ export const SetupView: React.FC<SetupViewProps> = ({ onSave, onCancel, eventToE
     try {
       const category = (eventToEdit && eventToEdit.title === title && eventToEdit.category)
         ? eventToEdit.category
-        : await getCategoryForTitle(title);
+        // FIX: Pass categories to getCategoryForTitle
+        : await getCategoryForTitle(title, categories);
 
       const finalDetails: EventFormData = { title, date, time, timezone, backgroundImage, category };
       onSave(finalDetails);

@@ -9,16 +9,22 @@ import { CakeIcon } from './icons/CakeIcon';
 import { BriefcaseIcon } from './icons/BriefcaseIcon';
 import { PlaneIcon } from './icons/PlaneIcon';
 import { TagIcon } from './icons/TagIcon';
-import { CATEGORIES } from '../constants/categories';
 import { EditIcon } from './icons/EditIcon';
+import { Confetti } from './Confetti';
+import { CogIcon } from './icons/CogIcon';
+import { CategoryManager } from './CategoryManager';
 
 interface DashboardViewProps {
   events: EventDetails[];
+  categories: string[];
   onSelectEvent: (id: string) => void;
   onDeleteEvent: (id: string) => void;
   onAddNew: () => void;
   onEditEvent: (id: string) => void;
   onUpdateEvent: (id: string, updates: Partial<EventDetails>) => void;
+  onAddCategory: (name: string) => void;
+  onUpdateCategory: (oldName: string, newName: string) => void;
+  onDeleteCategory: (name: string) => void;
 }
 
 const MiniTimeCard: React.FC<{ value: number; label: string }> = ({ value, label }) => (
@@ -46,11 +52,12 @@ const EventCard: React.FC<{
   timeLeft: TimeLeft;
   isFinished: boolean;
   progress: number;
+  categories: string[];
   onSelect: () => void;
   onEdit: (e: React.MouseEvent) => void;
   onDelete: (e: React.MouseEvent) => void;
   onUpdateCategory: (newCategory: string) => void;
-}> = ({ event, timeLeft, isFinished, progress, onSelect, onEdit, onDelete, onUpdateCategory }) => {
+}> = ({ event, timeLeft, isFinished, progress, categories, onSelect, onEdit, onDelete, onUpdateCategory }) => {
   const CategoryIcon = categoryIconMap[event.category || 'Other'] || TagIcon;
   const [isEditingCategory, setIsEditingCategory] = useState(false);
 
@@ -70,6 +77,7 @@ const EventCard: React.FC<{
         className="relative bg-gray-800 rounded-xl overflow-hidden group transition-all duration-500 hover:shadow-cyan-500/20 hover:shadow-2xl hover:-translate-y-2 cursor-pointer animate-fade-in"
         onClick={onSelect}
     >
+      {isFinished && <Confetti count={80} />}
       {event.backgroundImage && (
         <div 
           className="absolute inset-0 bg-cover bg-center transition-all duration-500 group-hover:scale-110 filter blur-sm group-hover:blur-none"
@@ -110,7 +118,7 @@ const EventCard: React.FC<{
         {/* Middle Section: Countdown */}
         <div className="flex-grow flex items-center justify-center -my-4">
              {isFinished ? (
-              <div className="text-center w-full text-green-400 font-bold text-2xl py-3">Event Started</div>
+              <div className="text-center w-full text-green-400 font-bold text-2xl py-3 animate-pop-in">Finished</div>
             ) : (
               <div className="flex justify-around w-full items-center transition-all duration-300">
                   <MiniTimeCard value={timeLeft.days} label="Days" />
@@ -134,7 +142,7 @@ const EventCard: React.FC<{
                             className="text-xs bg-gray-700 text-gray-200 py-1 pl-1 pr-4 rounded-md border-gray-600 focus:outline-none focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500"
                             autoFocus
                         >
-                            {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                     ) : (
                         <div 
@@ -161,10 +169,11 @@ const EventCard: React.FC<{
   );
 };
 
-export const DashboardView: React.FC<DashboardViewProps> = ({ events, onSelectEvent, onDeleteEvent, onAddNew, onEditEvent, onUpdateEvent }) => {
+export const DashboardView: React.FC<DashboardViewProps> = ({ events, categories, onSelectEvent, onDeleteEvent, onAddNew, onEditEvent, onUpdateEvent, onAddCategory, onUpdateCategory, onDeleteCategory }) => {
     const [currentTime, setCurrentTime] = useState(() => new Date());
     const [activeFilter, setActiveFilter] = useState('All');
-    const displayCategories = useMemo(() => ["All", ...CATEGORIES], []);
+    const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
+    const displayCategories = useMemo(() => ["All", ...categories], [categories]);
 
     useEffect(() => {
         const timerId = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -220,6 +229,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ events, onSelectEv
     }, [countdowns.length]);
 
   return (
+    <>
     <div className="w-full max-w-6xl mx-auto p-4 md:p-8 animate-fade-in">
         <div className="flex justify-between items-center mb-6">
             <h1 className="text-4xl font-bold text-white">Your Countdowns</h1>
@@ -246,6 +256,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ events, onSelectEv
                     {category}
                 </button>
             ))}
+             <button 
+                onClick={() => setIsCategoryManagerOpen(true)}
+                className="p-2 ml-2 rounded-full bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white transition-colors"
+                title="Manage Categories"
+            >
+                <CogIcon className="w-5 h-5" />
+            </button>
         </div>
 
         {events.length > 0 ? (
@@ -258,6 +275,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ events, onSelectEv
                             timeLeft={event.timeLeft}
                             isFinished={event.isFinished}
                             progress={event.progress}
+                            categories={categories}
                             onSelect={() => onSelectEvent(event.id)}
                             onEdit={(e) => {
                                 e.stopPropagation();
@@ -300,5 +318,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ events, onSelectEv
             </div>
         )}
     </div>
+    {isCategoryManagerOpen && (
+        <CategoryManager
+            categories={categories}
+            onClose={() => setIsCategoryManagerOpen(false)}
+            onAdd={onAddCategory}
+            onUpdate={onUpdateCategory}
+            onDelete={onDeleteCategory}
+        />
+    )}
+    </>
   );
 };
