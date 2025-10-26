@@ -1,0 +1,5 @@
+{
+  "name": "Countdown Dashboard",
+  "description": "A responsive countdown dashboard to manage multiple events. Set future dates, see live countdowns with custom background images, and add events to your calendar. All countdowns are saved locally.",
+  "requestFramePermissions": []
+}
